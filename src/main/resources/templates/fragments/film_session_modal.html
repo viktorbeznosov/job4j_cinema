@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<section th:fragment="film_session_modal">
+    <style>
+        /* Дополнительные стили для мест */
+        .seat-container {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .screen {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            margin-bottom: 30px;
+            border-radius: 5px;
+            font-weight: bold;
+            letter-spacing: 3px;
+        }
+
+        .seats-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .row-label {
+            min-width: 30px;
+            text-align: center;
+            font-weight: bold;
+            color: #666;
+        }
+
+        .seat {
+            width: 35px;
+            height: 35px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .seat.free {
+            background-color: #ffc107; /* желтый для свободных */
+            color: #333;
+            border: 2px solid #ffc107;
+        }
+
+        .seat.selected {
+            background-color: #28a745; /* желтый для свободных */
+            color: #333;
+            border: 2px solid #28a745;
+        }
+
+        .seat.selected:hover {
+            background-color: #28a745;
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+        }
+
+        .seat.free:hover {
+            background-color: #ffca2c;
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+        }
+
+        .seat.free.selected {
+            background-color: #28a745; /* зеленый для выбранных */
+            border-color: #28a745;
+            color: white;
+        }
+
+        .seat.occupied {
+            background-color: #dc3545; /* красный для занятых */
+            color: white;
+            border: 2px solid #dc3545;
+            cursor: not-allowed;
+        }
+
+        .seat.legend {
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+        }
+
+        .legend-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .selected-seats {
+            background: #e7f5ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .selected-seats-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .seat-badge {
+            background: #0d6efd;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 14px;
+        }
+
+        .aisle {
+            width: 40px;
+            visibility: hidden;
+        }
+
+        @media (max-width: 768px) {
+            .seat {
+                width: 30px;
+                height: 30px;
+                font-size: 10px;
+            }
+
+            .aisle {
+                width: 20px;
+            }
+        }
+    </style>
+    <!-- Модальное окно с собственным скроллом -->
+    <div id="buyTicketModal" class="modal" style="display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7);">
+        <!-- Контейнер модального окна -->
+        <div class="modal-container" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+          width: 90%; max-width: 650px; max-height: 90vh; display: flex; flex-direction: column;">
+
+            <!-- Шапка модального окна (фиксированная) -->
+            <div class="modal-header" style="background: #fff; padding: 20px 25px; border-radius: 10px 10px 0 0;
+              box-shadow: 0 2px 10px rgba(0,0,0,0.1); flex-shrink: 0;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="modal-title mb-0" style="font-weight: bold;">
+                        <i class="fas fa-ticket-alt me-2 text-primary"></i>
+                        Бронирование билета
+                    </h5>
+                    <button type="button" class="close-modal"
+                            style="background: none; border: none; font-size: 1.8rem; cursor: pointer; color: #6c757d; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
+                        &times;
+                    </button>
+                </div>
+            </div>
+
+            <!-- Тело модального окна (скроллируемое) -->
+            <div class="modal-body" style="background: #fff; padding: 0; overflow-y: auto; flex-grow: 1;">
+                <div style="padding: 25px;">
+                    <!-- Схема зала -->
+                    <div class="seat-container">
+                        <div class="screen">
+                            ЭКРАН
+                        </div>
+
+                        <!-- Схема мест будет сгенерирована JavaScript -->
+                        <div class="seats-grid" id="seatsGrid">
+                            <!-- Места будут добавлены здесь -->
+                        </div>
+
+                        <!-- Легенда -->
+                        <div class="legend-container">
+                            <div class="legend-item">
+                                <div class="seat legend free"></div>
+                                <span>Свободно</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="seat legend occupied"></div>
+                                <span>Занято</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="seat legend selected"></div>
+                                <span>Выбрано</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Выбранные места -->
+                    <div class="selected-seats" id="selectedSeatsSection" style="display: none;">
+                        <h6><i class="fas fa-check-circle me-2"></i>Выбранные места</h6>
+                        <div class="selected-seats-list" id="selectedSeatsList">
+                            <!-- Выбранные места будут добавлены здесь -->
+                        </div>
+                        <div class="mt-3">
+                            <small class="text-muted">Выбрано мест: <span id="selectedCount">0</span></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Футер модального окна (фиксированный) -->
+            <div class="modal-footer" style="background: #fff; padding: 20px 25px; border-radius: 0 0 10px 10px;
+              box-shadow: 0 -2px 10px rgba(0,0,0,0.1); flex-shrink: 0;">
+                <div class="d-flex justify-content-between w-100">
+                    <button type="button" class="btn btn-outline-secondary close-modal" style="padding: 10px 25px;">
+                        <i class="fas fa-times me-2"></i> Отмена
+                    </button>
+                    <button
+                            th:disabled="true"
+                            class="btn btn-primary"
+                            id="confirmBooking"
+                            style="padding: 10px 30px;">
+                        <i class="fas fa-check me-2"></i> Подтвердить бронь
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Внутри body, перед закрывающим тегом -->
+    <script th:inline="javascript">
+        // Данные передаются напрямую из Thymeleaf
+        var places = [[${places}]];
+        console.log(places)
+    </script>
+    <!-- jQuery скрипт для работы модального окна -->
+    <script>
+        $(document).ready(function() {
+            // Цена за билет
+            var ticketPrice = parseFloat('<span th:text="${filmSession.price}"></span>') || 500;
+
+            // Хранилище выбранных мест
+            var selectedSeats = [];
+            var selectedPlaces = [];
+
+            // Элементы модального окна
+            var $modal = $('#buyTicketModal');
+            var $buyButton = $('#buy_ticket');
+            var $closeButtons = $('.close-modal');
+            var $confirmButton = $('#confirmBooking');
+            var $seatsGrid = $('#seatsGrid');
+            var $selectedSeatsSection = $('#selectedSeatsSection');
+            var $selectedSeatsList = $('#selectedSeatsList');
+            var $selectedCount = $('#selectedCount');
+            var $footerSelectedCount = $('#footerSelectedCount');
+            var $orderSummary = $('#orderSummary');
+            var $totalPrice = $('#totalPrice');
+            var $priceDetails = $('#priceDetails');
+            var $selectedSeatsText = $('#selectedSeatsText');
+            var $continueButton = $('#continueButton');
+            var $selectSeatsHint = $('#selectSeatsHint');
+
+            // Элементы для скролла
+            var $scrollContainer = $('.container-fluid');
+
+            // Генерация схемы зала
+            function generateSeatsGrid() {
+                $seatsGrid.empty();
+
+                // Группируем места по рядам
+                var rows = {};
+                places.forEach(function(place) {
+                    if (!rows[place.rowNumber]) {
+                        rows[place.rowNumber] = [];
+                    }
+                    rows[place.rowNumber].push(place);
+                });
+
+                // Сортируем ряды по номеру
+                var sortedRows = Object.keys(rows).sort(function(a, b) {
+                    return parseInt(a) - parseInt(b);
+                });
+
+                // Создаем ряды
+                sortedRows.forEach(function(rowNum) {
+                    var rowPlaces = rows[rowNum];
+
+                    // Сортируем места в ряду по номеру
+                    rowPlaces.sort(function(a, b) {
+                        return a.placeNumber - b.placeNumber;
+                    });
+
+                    var $row = $('<div class="row"></div>');
+                    var $rowLabel = $('<div class="row-label">' + rowNum + '</div>');
+                    $row.append($rowLabel);
+
+                    // Добавляем проход после 5го места (визуальное разделение)
+                    rowPlaces.forEach(function(place, index) {
+                        if (index === 5) {
+                            $row.append('<div class="aisle"></div>');
+                        }
+
+                        var seatClass = place.free ? 'free' : 'occupied';
+                        var $seat = $('<div class="seat ' + seatClass + '" data-row="' + place.rowNumber +
+                            '" data-place="' + place.placeNumber + '" data-free="' + place.free + '">' +
+                            place.placeNumber + '</div>');
+
+                        $seat.on('click', function() {
+                            if (place.free) {
+                                toggleSeatSelection(place);
+                            }
+                        });
+
+                        $row.append($seat);
+                    });
+
+                    $seatsGrid.append($row);
+                });
+
+                // Обновляем выбранные места
+                updateSelectedSeats();
+            }
+
+            // Переключение выбора места
+            function toggleSeatSelection(place) {
+                var seatKey = place.rowNumber + '-' + place.placeNumber;
+                var index = selectedSeats.indexOf(seatKey);
+
+                const selectedPlace = {
+                    sessionId: place.sessionId,
+                    rowNumber: place.rowNumber,
+                    placeNumber: place.placeNumber,
+                }
+                var placeIndex = selectedPlaces.indexOf(selectedPlace);
+                if (placeIndex === -1) {
+                    selectedPlaces.push(selectedPlace)
+                } else  {
+                    selectedPlaces.splice(placeIndex, 1)
+                }
+
+                if (index === -1) {
+                    // Добавляем место
+                    selectedSeats.push(seatKey);
+                } else {
+                    // Убираем место
+                    selectedSeats.splice(index, 1);
+                }
+
+                // Обновляем UI
+                updateSeatsSelection();
+                updateSelectedSeats();
+                updateOrderSummary();
+                updateContinueButton();
+            }
+
+            // Обновление выделения мест на схеме
+            function updateSeatsSelection() {
+                $('.seat.free').removeClass('selected');
+
+                selectedSeats.forEach(function(seatKey) {
+                    var parts = seatKey.split('-');
+                    var row = parts[0];
+                    var place = parts[1];
+
+                    $('.seat[data-row="' + row + '"][data-place="' + place + '"]').addClass('selected');
+                });
+            }
+
+            // Обновление списка выбранных мест
+            function updateSelectedSeats() {
+                $selectedSeatsList.empty();
+
+                if (selectedSeats.length > 0) {
+                    $confirmButton.prop('disabled', false);
+                    $selectedSeatsSection.show();
+
+                    selectedSeats.forEach(function(seatKey) {
+                        var parts = seatKey.split('-');
+                        var row = parts[0];
+                        var place = parts[1];
+
+                        var $badge = $('<div class="seat-badge">' +
+                            '<span>Ряд ' + row + ', Место ' + place + '</span>' +
+                            '<button type="button" class="btn-close btn-close-white ms-2" style="font-size: 10px;" data-seat="' + seatKey + '"></button>' +
+                            '</div>');
+
+                        $badge.find('.btn-close').on('click', function(e) {
+                            e.stopPropagation();
+                            var seatToRemove = $(this).data('seat');
+                            var index = selectedSeats.indexOf(seatToRemove);
+                            if (index !== -1) {
+                                selectedSeats.splice(index, 1);
+                                updateSeatsSelection();
+                                updateSelectedSeats();
+                                updateOrderSummary();
+                                updateContinueButton();
+                            }
+                        });
+
+                        $selectedSeatsList.append($badge);
+                    });
+
+                    $selectedCount.text(selectedSeats.length);
+                    $footerSelectedCount.text(selectedSeats.length);
+                } else {
+                    $confirmButton.prop('disabled', true);
+                    $selectedSeatsSection.hide();
+                    $selectedCount.text('0');
+                    $footerSelectedCount.text('0');
+                }
+            }
+
+            // Обновление итоговой стоимости
+            function updateOrderSummary() {
+                if (selectedSeats.length > 0) {
+                    $orderSummary.show();
+                    var total = selectedSeats.length * ticketPrice;
+                    $totalPrice.text(total.toFixed(2) + ' ₽');
+                    $priceDetails.text(selectedSeats.length + ' × ' + ticketPrice.toFixed(2) + ' ₽');
+                    $selectedSeatsText.text(selectedSeats.length + ' мест' + (selectedSeats.length === 1 ? '' : 'а'));
+                } else {
+                    $orderSummary.hide();
+                    $totalPrice.text('0 ₽');
+                }
+            }
+
+            // Обновление кнопки продолжения
+            function updateContinueButton() {
+                if (selectedSeats.length > 0) {
+                    $continueButton.show();
+                    $selectSeatsHint.hide();
+                } else {
+                    $continueButton.hide();
+                    $selectSeatsHint.show();
+                }
+            }
+
+            // Открытие модального окна
+            $buyButton.on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                // Генерируем схему мест
+                generateSeatsGrid();
+
+                // Сбрасываем выбранные места
+                selectedSeats = [];
+                updateSeatsSelection();
+                updateSelectedSeats();
+                updateOrderSummary();
+                updateContinueButton();
+
+                // Показываем модальное окно
+                $modal.fadeIn(300);
+
+                // Блокируем скролл основного контента
+                $('body').css('overflow', 'hidden');
+                $scrollContainer.css('overflow', 'hidden');
+
+                // Прокручиваем модальное окно в начало
+                $modal.find('.modal-body').scrollTop(0);
+            });
+
+            // Закрытие модального окна
+            $closeButtons.on('click', function() {
+                closeModal();
+            });
+
+            // Закрытие при клике вне модального окна
+            $(window).on('click', function(e) {
+                if ($(e.target).is($modal)) {
+                    closeModal();
+                }
+            });
+
+            // Закрытие по клавише ESC
+            $(document).on('keyup', function(e) {
+                if (e.key === 'Escape' && $modal.is(':visible')) {
+                    closeModal();
+                }
+            });
+
+            // Обработка подтверждения бронирования
+            $confirmButton.on('click', function() {
+                const placesJson = JSON.stringify(selectedPlaces);
+                console.log(placesJson)
+                document.getElementById('seatsData').value = placesJson;
+                $('#bookingForm').submit();
+            });
+
+            // Функция для закрытия модального окна
+            function closeModal() {
+                $modal.fadeOut(300);
+                $('body').css('overflow', 'auto');
+            }
+
+            // Дополнительная функциональность: предупреждение если мало билетов
+            function checkTicketsAvailability() {
+                var freeTickets = parseInt($('#modal-free-tickets').text());
+                if (freeTickets <= 3 && freeTickets >= 0) {
+                    // Добавляем предупреждение в модальное окно
+                    if (!$('#low-tickets-warning').length) {
+                        $('.modal-body').prepend(
+                            '<div id="low-tickets-warning" class="alert alert-warning" style="padding: 10px; margin-bottom: 15px;">' +
+                            '<strong>Внимание!</strong> Осталось всего ' + freeTickets + ' билета(ов).' +
+                            '</div>'
+                        );
+                    }
+                }
+            }
+
+            // Инициализация при загрузке
+            checkTicketsAvailability();
+        });
+    </script>
+    <!-- Дополнительные стили -->
+    <style>
+        .modal-container {
+            animation: modalSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -48%) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .btn {
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        @media (max-width: 768px) {
+            .modal-container {
+                width: 98% !important;
+                max-height: 98vh !important;
+            }
+
+            .modal-header, .modal-footer {
+                padding: 15px !important;
+            }
+
+            .modal-body {
+                padding: 15px !important;
+            }
+        }
+    </style>
+</section>

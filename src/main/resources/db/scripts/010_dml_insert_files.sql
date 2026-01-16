@@ -1,0 +1,1 @@
+INSERT INTO files(name, path) VALUES ('no_image.jpg', 'files/no_image.jpg');

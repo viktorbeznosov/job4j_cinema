@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:include="fragments/header :: header"></head>
+<body>
+<div th:replace="fragments/navigation :: navigation"></div>
+<div th:include="fragments/toast_message :: toast_message"></div>
+<div class="container-fluid p-5" style="height: calc(100vh - 120px); overflow-y: auto;">
+    <h1 th:text="${filmSession.film.name}"></h1>
+    <div class="card shadow-sm">
+        <!-- Постер фильма -->
+        <div class="col-md-4">
+            <img th:src="@{/files/{fileId}(fileId=*{filmSession.film.fileId})}"
+                 th:alt="${filmSession.film.name}"
+                 class="img-fluid rounded-start w-100 h-100 object-fit-cover">
+        </div>
+        <!-- Информация о сеансе -->
+        <div class="col-md-8">
+            <div class="card-body">
+                <!-- Название зала -->
+                <p class="h5 mb-3">
+                    Зал: <span th:text="${filmSession.hall.name}"></span>
+                </p>
+
+                <!-- Время начала и окончания -->
+                <div class="mb-3">
+                    <p class="mb-1">
+                        Начало:
+                        <span class="fw-semibold"
+                              th:text="${#temporals.format(filmSession.startTime, 'HH:mm')}"></span>
+                    </p>
+                    <p class="mb-0">
+                        Окончание:
+                        <span class="fw-semibold"
+                              th:text="${#temporals.format(filmSession.endTime, 'HH:mm')}"></span>
+                    </p>
+                </div>
+
+                <!-- Цена -->
+                <div class="d-flex align-items-baseline justify-content-between flex-wrap">
+                    <div class="mb-2">
+                        <span class="h4 mb-0 me-2"
+                              th:text="${#numbers.formatDecimal(filmSession.price, 0, 'COMMA', 2, 'POINT')}">
+                        </span>
+                        <span class="text-muted">₽ за билет</span>
+                    </div>
+
+                    <div class="mb-2">
+                        <span class="text-muted">Осталось билетов</span>
+                        <span class="h4 mb-0 me-2"
+                              th:text="${filmSession.freeTickets}">
+                        </span>
+                    </div>
+
+                    <!-- Кнопка покупки / брони -->
+                    <a href="#"
+                       class="btn btn-primary btn-lg"
+                       data-bs-toggle="modal"
+                       data-bs-target="#buyTicketModal"
+                       id="buy_ticket"
+                    >
+                        Забронировать
+                    </a>
+                </div>
+            </div>
+
+            <!-- Футер карточки, можно вывести дату -->
+            <div class="card-footer text-muted d-flex justify-content-between">
+                    <span>
+                        Дата сеанса:
+                        <span th:text="${#temporals.format(filmSession.startTime, 'dd.MM.YYYY HH:mm')}"></span>
+                    </span>
+                <span th:text="${filmSession.hall.name}"></span>
+            </div>
+        </div>
+    </div>
+    <form id="bookingForm" th:type="hidden" method="POST" th:action="@{/tickets/book}">
+        <!-- Динамически добавляемые поля -->
+        <div id="seatsFields">
+            <input th:type="hidden" th:id="seatsData" th:name="seatsData">
+            <input th:type="hidden" th:id="sessionId" th:name="sessionId" th:value="${filmSession.id}">
+        </div>
+    </form>
+</div>
+
+<div th:include="fragments/film_session_modal :: film_session_modal"></div>
+
+<footer th:include="fragments/footer :: footer" class="fixed-bottom"></footer>
+
+</body>
+</html>

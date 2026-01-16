@@ -1,15 +1,23 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <nav th:fragment="navigation" class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container px-5">
-        <a class="navbar-brand" href="#!">Start Bootstrap</a>
+        <a class="navbar-brand" href="/index">
+            <img th:src="@{/files/get_by_name/{fileName}(fileName='logo')}" alt="No image" class="img-fluid" style="max-width: 40px; height: auto;">
+        </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                <li class="nav-item"><a class="nav-link active" aria-current="page" href="#!">Home</a></li>
-                <li class="nav-item"><a class="nav-link" href="#!">About</a></li>
-                <li class="nav-item"><a class="nav-link" href="#!">Contact</a></li>
-                <li class="nav-item"><a class="nav-link" href="#!">Services</a></li>
+                <li class="nav-item"><a class="nav-link" href="/films">Наши фильмы</a></li>
+                <li class="nav-item"><a class="nav-link" href="/film_sessions">Сеансы</a></li>
             </ul>
+        </div>
+        <div class="d-flex" th:if="${user.fullName == 'Гость'}">
+            <a class="nav-link text-secondary me-3" th:href="@{/users/register}">Регистрация</a>
+            <a class="nav-link text-secondary" th:href="@{/users/login}">Войти</a>
+        </div>
+        <div class="d-flex" th:if="${user.fullName != 'Гость'}">
+            <a class="nav-link text-secondary me-3" href="#" th:text="${user.fullName}"></a>
+            <a class="nav-link text-secondary" th:href="@{/users/logout}">Выйти</a>
         </div>
     </div>
 </nav>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<section th:fragment="toast_message">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Toast (top-right)</title>
+        <style>
+            .toastContain {
+                position: fixed;
+                top: 16px;
+                right: 16px;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                z-index: 9999;
+            }
+
+            .toast {
+                background: #222;
+                color: #fff;
+                padding: 10px 12px;
+                border-radius: 10px;
+                box-shadow: 0 10px 30px rgba(0,0,0,.25);
+                opacity: 0;
+                transform: translateY(-8px);
+                transition: opacity .2s ease, transform .2s ease;
+                max-width: 360px;
+            }
+
+            .toast.open {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            /* необязательно: типы */
+            .toast.success { background: #1f7a3a; }
+            .toast.error   { background: #a62929; }
+        </style>
+    </head>
+    <body>
+<!--    <button onclick="toast('Сохранено', 'success')">Success</button>-->
+<!--    <button onclick="toast('Ошибка валидации', 'error')">Error</button>-->
+
+    <script th:inline="javascript">
+        $(document).ready(function() {
+            var message = [[${message}]];
+            var result = [[${result}]];
+            if (message) {
+                toast(message, result)
+            }
+        })
+    </script>
+
+    <script>
+        const FADE_DUR = 500;
+        const DISPLAY_DUR = 3000;
+        let toastContain;
+
+        function toast(message, extraClasses = "") {
+            if (!toastContain) {
+                toastContain = document.createElement("div");
+                toastContain.classList.add("toastContain");
+                document.body.appendChild(toastContain);
+            }
+
+            const el = document.createElement("div");
+            el.classList.add("toast");
+            if (extraClasses) el.classList.add(extraClasses);
+            el.innerText = message;
+
+            toastContain.prepend(el);
+
+            setTimeout(() => el.classList.add("open"), 10);
+            setTimeout(() => el.classList.remove("open"), DISPLAY_DUR);
+            setTimeout(() => toastContain.removeChild(el), DISPLAY_DUR + FADE_DUR);
+        }
+    </script>
+    </body>
+</section>
+
+
