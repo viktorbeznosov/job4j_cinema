@@ -6,15 +6,16 @@ import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.job4j.cinema.dto.PlaceDto;
 import ru.job4j.cinema.model.*;
-import ru.job4j.cinema.repository.Sql2oTicketRepository;
-import ru.job4j.cinema.repository.TicketRepository;
-import ru.job4j.cinema.service.SimpleTicketService;
-import ru.job4j.cinema.service.TicketService;
+import ru.job4j.cinema.repository.interfaces.TicketRepository;
+import ru.job4j.cinema.service.implementations.SimpleTicketService;
+import ru.job4j.cinema.service.interfaces.TicketService;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -68,7 +69,8 @@ class TicketControllerTest {
         request.setAttribute("sessionId", session.getId());
         RedirectAttributes redirectAttributes = mock(RedirectAttributes.class);
         HttpSession session = mock(HttpSession.class);
-        var view = ticketController.book(request, redirectAttributes, session);
+        Model model = mock(Model.class);
+        var view = ticketController.book(request, redirectAttributes, session, model);
 
         assertThat(view).isEqualTo("redirect:/login");
     }
@@ -89,12 +91,15 @@ class TicketControllerTest {
         when(httpSession.getAttribute("user")).thenReturn(user);
         when(request.getSession()).thenReturn(httpSession);
         when(ticketRepository.findByPlace(any(PlaceDto.class))).thenReturn(ticket);
+        doThrow(new Exception("Билет уже был забронирован ранее"))
+                .when(ticketRepository)
+                .book(any(List.class), any(User.class));
 
-        var view = ticketController.book(request, redirectAttributes, httpSession);
+        Model model = mock(Model.class);
+        var view = ticketController.book(request, redirectAttributes, httpSession, model);
 
-        assertThat(view).isEqualTo(String.format("redirect:/film_sessions/%s", session.getId()));
-        verify(redirectAttributes).addFlashAttribute("result", "error");
-        verify(redirectAttributes).addFlashAttribute("message", "Билет уже был забронирован");
+        assertThat(view).isEqualTo("errors/409");
+        verify(model).addAttribute("message", "Билет уже был забронирован ранее");
     }
 
     @Test
@@ -114,7 +119,8 @@ class TicketControllerTest {
         when(ticketRepository.findByPlace(any(PlaceDto.class))).thenReturn(null);
         when(ticketRepository.save(any(Ticket.class))).thenReturn(Optional.of(ticket));
 
-        var view = ticketController.book(request, redirectAttributes, httpSession);
+        Model model = mock(Model.class);
+        var view = ticketController.book(request, redirectAttributes, httpSession, model);
 
         assertThat(view).isEqualTo(String.format("redirect:/film_sessions/%s", session.getId()));
         verify(redirectAttributes).addFlashAttribute("result", "success");

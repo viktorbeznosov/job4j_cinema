@@ -1,13 +1,17 @@
-package ru.job4j.cinema.repository;
+package ru.job4j.cinema.repository.interfaces;
 
 import ru.job4j.cinema.dto.PlaceDto;
 import ru.job4j.cinema.model.Ticket;
+import ru.job4j.cinema.model.User;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public interface TicketRepository {
     Optional<Ticket> save(Ticket ticket);
+
+    void book(List<PlaceDto> places, User user) throws Exception;
 
     boolean deleteById(int id);
 

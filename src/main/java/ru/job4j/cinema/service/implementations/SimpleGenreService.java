@@ -1,8 +1,9 @@
-package ru.job4j.cinema.service;
+package ru.job4j.cinema.service.implementations;
 
 import org.springframework.stereotype.Service;
 import ru.job4j.cinema.model.Genre;
-import ru.job4j.cinema.repository.GenreRepository;
+import ru.job4j.cinema.repository.interfaces.GenreRepository;
+import ru.job4j.cinema.service.interfaces.GenreService;
 
 import java.util.Collection;
 import java.util.Optional;

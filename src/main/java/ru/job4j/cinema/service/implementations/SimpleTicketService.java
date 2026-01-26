@@ -1,11 +1,12 @@
-package ru.job4j.cinema.service;
+package ru.job4j.cinema.service.implementations;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.job4j.cinema.dto.PlaceDto;
 import ru.job4j.cinema.model.Ticket;
 import ru.job4j.cinema.model.User;
-import ru.job4j.cinema.repository.TicketRepository;
+import ru.job4j.cinema.repository.interfaces.TicketRepository;
+import ru.job4j.cinema.service.interfaces.TicketService;
 
 import java.util.Collection;
 import java.util.List;
@@ -47,23 +48,10 @@ public class SimpleTicketService implements TicketService {
 
     @Override
     public void book(List<PlaceDto> places, User user) throws Exception {
-        for (PlaceDto place: places) {
-            Optional<Ticket> existingTicket = Optional.ofNullable(ticketRepository.findByPlace(place));
-            if (existingTicket.isPresent()) {
-                throw new Exception("Билет уже был забронирован");
-            }
+        if (places.size() > 3) {
+            throw new Exception("Бронировать можно не более трех билетов");
         }
-        for (PlaceDto place: places) {
-            Ticket ticket = new Ticket();
-            ticket.setSessionId(place.getSessionId());
-            ticket.setPlaceNumber(place.getPlaceNumber());
-            ticket.setRowNumber(place.getRowNumber());
-            ticket.setUserId(user.getId());
 
-            var result = ticketRepository.save(ticket);
-            if (result.isEmpty()) {
-                throw new Exception("Ошибка бронирования билета");
-            }
-        }
+        ticketRepository.book(places, user);
     }
 }

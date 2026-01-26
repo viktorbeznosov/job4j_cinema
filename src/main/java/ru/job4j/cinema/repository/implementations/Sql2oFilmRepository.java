@@ -1,13 +1,12 @@
-package ru.job4j.cinema.repository;
+package ru.job4j.cinema.repository.implementations;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import org.sql2o.ResultSetHandler;
 import org.sql2o.Sql2o;
-import org.sql2o.Sql2oException;
-import ru.job4j.cinema.dto.FileDto;
 import ru.job4j.cinema.model.Film;
 import ru.job4j.cinema.model.Genre;
+import ru.job4j.cinema.repository.interfaces.FilmRepository;
 
 import java.util.Collection;
 import java.util.Optional;

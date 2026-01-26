@@ -1,11 +1,12 @@
-package ru.job4j.cinema.service;
+package ru.job4j.cinema.service.implementations;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.job4j.cinema.model.FilmSession;
 import ru.job4j.cinema.model.Place;
-import ru.job4j.cinema.repository.FilmSessionRepository;
-import ru.job4j.cinema.repository.FilmSessionsPlaceRepository;
+import ru.job4j.cinema.repository.interfaces.FilmSessionRepository;
+import ru.job4j.cinema.repository.interfaces.FilmSessionsPlaceRepository;
+import ru.job4j.cinema.service.interfaces.FilmSessionService;
 
 import java.util.Collection;
 import java.util.Optional;

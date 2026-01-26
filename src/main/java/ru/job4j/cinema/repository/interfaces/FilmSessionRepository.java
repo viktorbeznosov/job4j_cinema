@@ -1,15 +1,12 @@
-package ru.job4j.cinema.service;
+package ru.job4j.cinema.repository.interfaces;
 
 import ru.job4j.cinema.model.FilmSession;
-import ru.job4j.cinema.model.Place;
 
 import java.util.Collection;
 import java.util.Optional;
 
-public interface FilmSessionService {
+public interface FilmSessionRepository {
     Optional<FilmSession> findById(int id);
 
     Collection<FilmSession> findAll();
-
-    Collection<Place> getPlaces(int sessionId);
 }

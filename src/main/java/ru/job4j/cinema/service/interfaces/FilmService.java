@@ -1,4 +1,4 @@
-package ru.job4j.cinema.repository;
+package ru.job4j.cinema.service.interfaces;
 
 import ru.job4j.cinema.dto.FileDto;
 import ru.job4j.cinema.model.Film;
@@ -6,7 +6,7 @@ import ru.job4j.cinema.model.Film;
 import java.util.Collection;
 import java.util.Optional;
 
-public interface FilmRepository {
+public interface FilmService {
     Optional<Film> findById(int id);
 
     Collection<Film> findAll();

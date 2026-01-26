@@ -1,12 +1,11 @@
-package ru.job4j.cinema.repository;
+package ru.job4j.cinema.repository.implementations;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import org.sql2o.Sql2o;
 import ru.job4j.cinema.model.File;
+import ru.job4j.cinema.repository.interfaces.FileRepository;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Optional;
 
 @Slf4j

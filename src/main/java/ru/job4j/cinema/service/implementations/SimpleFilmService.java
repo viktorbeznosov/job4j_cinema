@@ -1,10 +1,11 @@
-package ru.job4j.cinema.service;
+package ru.job4j.cinema.service.implementations;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.job4j.cinema.dto.FileDto;
 import ru.job4j.cinema.model.Film;
-import ru.job4j.cinema.repository.FilmRepository;
+import ru.job4j.cinema.repository.interfaces.FilmRepository;
+import ru.job4j.cinema.service.interfaces.FileService;
+import ru.job4j.cinema.service.interfaces.FilmService;
 
 import java.util.Collection;
 import java.util.Optional;

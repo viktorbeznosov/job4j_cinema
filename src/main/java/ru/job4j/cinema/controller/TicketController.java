@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.job4j.cinema.dto.PlaceDto;
 import ru.job4j.cinema.model.User;
-import ru.job4j.cinema.service.TicketService;
+import ru.job4j.cinema.service.interfaces.TicketService;
 
 import java.util.List;
 
@@ -33,7 +33,8 @@ public class TicketController {
     public String book(
             HttpServletRequest request,
             RedirectAttributes redirectAttributes,
-            HttpSession session
+            HttpSession session,
+            Model model
     ) throws JsonProcessingException {
         var user = (User) session.getAttribute("user");
         if (user == null) {
@@ -55,8 +56,8 @@ public class TicketController {
             redirectAttributes.addFlashAttribute("result", "success");
             redirectAttributes.addFlashAttribute("message", "Билеты успешно забронированы");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("result", "error");
-            redirectAttributes.addFlashAttribute("message", e.getMessage());
+            model.addAttribute("message", e.getMessage());
+            return "errors/409";
         }
 
         return String.format("redirect:/film_sessions/%s", sessionId);

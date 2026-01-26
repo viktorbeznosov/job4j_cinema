@@ -5,11 +5,8 @@ import net.jcip.annotations.ThreadSafe;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import ru.job4j.cinema.dto.FileDto;
-import ru.job4j.cinema.model.Film;
-import ru.job4j.cinema.service.FilmService;
-import ru.job4j.cinema.service.GenreService;
+import ru.job4j.cinema.service.interfaces.FilmService;
+import ru.job4j.cinema.service.interfaces.GenreService;
 
 @Slf4j
 @ThreadSafe

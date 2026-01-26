@@ -1,10 +1,11 @@
-package ru.job4j.cinema.repository;
+package ru.job4j.cinema.repository.implementations;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import org.sql2o.Sql2o;
-import org.sql2o.Sql2oException;
+import org.yaml.snakeyaml.constructor.DuplicateKeyException;
 import ru.job4j.cinema.model.User;
+import ru.job4j.cinema.repository.interfaces.UserRepository;
 
 import java.util.Optional;
 
@@ -33,7 +34,7 @@ public class Sql2oUserRepository implements UserRepository {
             user.setId(generatedId);
 
             return Optional.of(user);
-        } catch (Sql2oException e) {
+        } catch (DuplicateKeyException e) {
             log.error(e.getMessage(), e);
             return Optional.empty();
         }
