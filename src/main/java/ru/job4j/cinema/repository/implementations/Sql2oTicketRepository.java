@@ -39,7 +39,7 @@ public class Sql2oTicketRepository implements TicketRepository {
             ticket.setId(generatedId);
 
             return Optional.of(ticket);
-        } catch (DuplicateKeyException exception) {
+        } catch (Sql2oException exception) {
             log.error(exception.getMessage(), exception);
             return Optional.empty();
         }
