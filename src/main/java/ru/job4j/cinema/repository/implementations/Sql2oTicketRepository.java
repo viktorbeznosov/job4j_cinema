@@ -6,6 +6,7 @@ import org.sql2o.Sql2o;
 import org.sql2o.Sql2oException;
 import org.yaml.snakeyaml.constructor.DuplicateKeyException;
 import ru.job4j.cinema.dto.PlaceDto;
+import ru.job4j.cinema.exceptions.DuplicateTicketException;
 import ru.job4j.cinema.model.Ticket;
 import ru.job4j.cinema.model.User;
 import ru.job4j.cinema.repository.interfaces.TicketRepository;
@@ -41,6 +42,11 @@ public class Sql2oTicketRepository implements TicketRepository {
             return Optional.of(ticket);
         } catch (Sql2oException exception) {
             log.error(exception.getMessage(), exception);
+
+            if (DuplicateTicketException.isDuplicateKeyError(exception)) {
+                throw new DuplicateTicketException("Билет уже забронирован");
+            }
+
             return Optional.empty();
         }
     }
@@ -63,7 +69,10 @@ public class Sql2oTicketRepository implements TicketRepository {
             query.executeBatch();
         } catch (Sql2oException exception) {
             log.error(exception.getMessage(), exception);
-            throw new Exception("Билет уже был забронирован ранее");
+            if (DuplicateTicketException.isDuplicateKeyError(exception)) {
+                throw new DuplicateTicketException("Билет уже забронирован");
+            }
+            throw new Sql2oException("Ошибка обронирования билета");
         }
     }
 
